@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  database:
+    image: postgres:15
+    container_name: fullstack_db
+    environment:
+      POSTGRES_DB: fullstack_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - fullstack_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d fullstack_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Node.js + Express + Sequelize
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fullstack_backend
+    environment:
+      NODE_ENV: development
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: fullstack_db
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      JWT_SECRET: meu_jwt_secret_super_seguro
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - fullstack_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  fullstack_network:
+    driver: bridge
+
