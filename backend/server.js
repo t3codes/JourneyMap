@@ -4,7 +4,9 @@ require('dotenv').config();
 
 const { syncDatabase } = require('./models');
 const { testConnection } = require('./config/database');
-const usuariosRoutes = require('./routes/usuarios');
+const usuariosRoutes = require('./routes/usuariosRouters');
+const paisRoutes = require('./routes/paisReouters');
+const restCountriesRoutes = require('./routes/restCountriesRouters');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,12 +33,16 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       usuarios: '/api/usuarios',
-      login: '/api/usuarios/login'
+      login: '/api/usuarios/login',
+      paises: '/api/paises',
+      restCountries: '/api/rest-countries'
     }
   });
 });
 
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/paises', paisRoutes);
+app.use('/api/rest-countries', restCountriesRoutes);
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {

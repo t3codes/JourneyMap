@@ -1,5 +1,6 @@
 const { sequelize } = require('../config/database');
 const Usuario = require('./Usuario');
+const Pais = require('./Pais');
 
 // Sincronizar modelos com o banco de dados
 const syncDatabase = async () => {
@@ -14,6 +15,7 @@ const syncDatabase = async () => {
 module.exports = {
   sequelize,
   Usuario,
+  Pais,
   syncDatabase
 };
 
