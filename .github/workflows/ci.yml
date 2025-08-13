@@ -3,10 +3,10 @@ name: CI Workflow
 on:
   push:
     branches:
-      - master 
+      - master
   pull_request:
     branches:
-      - master 
+      - master
 
 jobs:
   test:
@@ -19,16 +19,18 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'  
+        node-version: '16'
 
     - name: Install dependencies
-      run: npm install
+      run: |
+        cd backend
+        npm install
 
-    
     - name: Run tests
-      run: npm test
+      run: |
+        cd backend
+        npm test
 
-    
     - name: Check for errors
       run: |
         if [ $? -ne 0 ]; then
