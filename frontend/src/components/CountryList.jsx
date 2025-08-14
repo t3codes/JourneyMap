@@ -32,7 +32,7 @@ const CountryList = ({ countries, onCountryClick, onRemoveCountry, onMarkVisited
 
   return (
     <div className="flex flex-col h-full">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Meus Países</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4">Minha lista de Países</h3>
       <ul className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
         {countries.map((country) => (
           <Tooltip.Provider key={country.id || country.nome_comum}>

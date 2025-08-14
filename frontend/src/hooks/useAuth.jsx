@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Erro ao fazer login' 
+        message: error.response?.data?.message || 'Erro ao fazer login verifique suas credenciais' 
       };
     }
   };
