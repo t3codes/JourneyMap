@@ -4,15 +4,20 @@ require('dotenv').config();
 
 const { syncDatabase } = require('./models');
 const { testConnection } = require('./config/database');
-const usuariosRoutes = require('./routes/usuarios');
+const usuariosRoutes = require('./routes/usuariosRouters');
+const paisRoutes = require('./routes/paisReouters');
+const restCountriesRoutes = require('./routes/restCountriesRouters');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(cors({
-  origin: '*', // Permitir todas as origens para desenvolvimento
-  credentials: true
+  origin: '*', // Permite todas as origens
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Permite todos os métodos HTTP
+  allowedHeaders: ['*'], // Permite todos os cabeçalhos
+  credentials: true, // Permite envio de credenciais (cookies, auth headers)
+  preflightContinue: false, // Garante que as requisições OPTIONS sejam tratadas corretamente
 }));
 
 app.use(express.json());
@@ -31,12 +36,21 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       usuarios: '/api/usuarios',
-      login: '/api/usuarios/login'
+      login: '/api/usuarios/login',
+      paises: '/api/paises',
+      restCountries: '/api/rest-countries'
     }
   });
 });
 
+// Rota de healthcheck
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/paises', paisRoutes);
+app.use('/api/rest-countries', restCountriesRoutes);
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
@@ -83,4 +97,3 @@ process.on('SIGINT', () => {
 
 // Inicializar servidor
 startServer();
-
