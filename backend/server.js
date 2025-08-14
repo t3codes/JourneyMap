@@ -13,8 +13,11 @@ const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(cors({
-  origin: '*', // Permitir todas as origens para desenvolvimento
-  credentials: true
+  origin: '*', // Permite todas as origens
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Permite todos os métodos HTTP
+  allowedHeaders: ['*'], // Permite todos os cabeçalhos
+  credentials: true, // Permite envio de credenciais (cookies, auth headers)
+  preflightContinue: false, // Garante que as requisições OPTIONS sejam tratadas corretamente
 }));
 
 app.use(express.json());
@@ -38,6 +41,11 @@ app.get('/', (req, res) => {
       restCountries: '/api/rest-countries'
     }
   });
+});
+
+// Rota de healthcheck
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 app.use('/api/usuarios', usuariosRoutes);
@@ -89,4 +97,3 @@ process.on('SIGINT', () => {
 
 // Inicializar servidor
 startServer();
-

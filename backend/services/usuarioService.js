@@ -1,8 +1,9 @@
 const { Usuario } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config(); 
 
-const JWT_SECRET = 'sua_chave_secreta';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const getUsuarioById = async (usuarioId) => {
   const usuario = await Usuario.findByPk(usuarioId);

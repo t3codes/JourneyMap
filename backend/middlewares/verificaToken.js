@@ -1,6 +1,9 @@
+require('dotenv').config(); // Isso carrega as variáveis de ambiente do .env
+
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = 'sua_chave_secreta'; // Use a chave secreta correta aqui
+// Agora você pode acessar as variáveis do .env diretamente
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const verificarToken = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', ''); // Extrair o token do header 'Authorization'
