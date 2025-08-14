@@ -11,6 +11,7 @@ import CustomAlert from '../components/CustomAlert.jsx';
 import AddCountryModal from '../components/AddCountryModal.jsx';
 import VisitedModal from '../components/VisitedModal.jsx';
 import { Button } from '../components/ui/button.jsx';
+import TutorialModal from '../components/ui/tutoModal.js';
 
 const Dashboard = () => {
   const [alert, setAlert] = useState({ isOpen: false, type: 'success', title: '', message: '' });
@@ -20,28 +21,30 @@ const Dashboard = () => {
   const [updatingCountry, setUpdatingCountry] = useState(false);
   const [removingCountry, setRemovingCountry] = useState(false);
   const { logout, isAuthenticated, user } = useAuth();
-  const { 
-    allCountries, 
-    userCountries, 
-    loading, 
-    error, 
-    getStats, 
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const {
+    allCountries,
+    userCountries,
+    loading,
+    error,
+    getStats,
     isCountryVisited,
     getUserCountryData,
-    refetch 
+    refetch
   } = useCountries();
   const navigate = useNavigate();
 
   useEffect(() => {
+
     if (!isAuthenticated) {
       navigate('/');
     }
-    
+    setIsTutorialOpen(true);
     // Expor função global para o WorldMap
     window.openAddCountryModal = (country) => {
       setAddCountryModal({ isOpen: true, country });
     };
-    
+
     return () => {
       delete window.openAddCountryModal;
     };
@@ -77,7 +80,7 @@ const Dashboard = () => {
     setAddingCountry(true);
     try {
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`http://127.0.0.1:5000/api/rest-countries/save/${countryName.toLowerCase()}`, {
         method: 'POST',
         headers: {
@@ -114,7 +117,7 @@ const Dashboard = () => {
     setRemovingCountry(true);
     try {
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`http://127.0.0.1:5000/api/paises/${country.id}`, {
         method: 'DELETE',
         headers: {
@@ -145,7 +148,7 @@ const Dashboard = () => {
     setUpdatingCountry(true);
     try {
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`http://127.0.0.1:5000/api/paises/${countryId}`, {
         method: 'PUT',
         headers: {
@@ -177,14 +180,19 @@ const Dashboard = () => {
   };
 
   if (error) {
+    const handleRedirectToLogin = () => {
+      logout(); // Chama a função logout do useAuth
+      navigate('/');
+    };
+
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-destructive mb-4">Erro ao carregar dados</h2>
+          <h2 className="text-2xl font-bold text-destructive mb-4">Sessão expirada, Faça login novamente para continuar.</h2>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={handleRefresh} className="bg-primary hover:bg-primary/90">
+          <Button onClick={handleRedirectToLogin} className="bg-primary hover:bg-primary/90">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Tentar Novamente
+            Logar novamente
           </Button>
         </div>
       </div>
@@ -204,10 +212,10 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-foreground">Travel Map</h1>
+              <h1 className="text-2xl font-bold text-foreground">Journey Map</h1>
               <span className="text-muted-foreground">Dashboard</span>
             </div>
-            
+
             <div className="flex items-center gap-4">
               {user && (
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -215,7 +223,7 @@ const Dashboard = () => {
                   <span className="text-sm">{user.email}</span>
                 </div>
               )}
-              
+
               <Button
                 onClick={handleRefresh}
                 variant="outline"
@@ -226,7 +234,7 @@ const Dashboard = () => {
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Atualizar
               </Button>
-              
+
               <Button
                 onClick={handleLogout}
                 variant="outline"
@@ -241,7 +249,7 @@ const Dashboard = () => {
         </div>
       </motion.header>
 
-        {/* Main Content */}
+      {/* Main Content */}
       <main className="flex h-[calc(100vh-80px)]">
         {/* Sidebar - Menu Lateral Esquerdo */}
         <motion.aside
@@ -253,7 +261,7 @@ const Dashboard = () => {
           <div className="p-4">
             {/* Stats Cards */}
             <StatsCard stats={stats} loading={loading} />
-            
+
             {/* Country List */}
             <div className="mt-6">
               <CountryList
@@ -277,21 +285,24 @@ const Dashboard = () => {
             className="p-4 pt-0 mt-8"
           >
             <div className="glass rounded-lg p-4 border border-border">
-              <h3 className="text-lg font-semibold text-foreground mb-3">Legenda</h3>
-              <div className="flex flex-wrap gap-4">
+              <h3 className="text-lg font-semibold text-foreground mb-4 text-center">Estatísticas de Viagem</h3>
+              <div className="flex flex-wrap justify-center gap-6">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-primary rounded-full border-2 border-white"></div>
-                  <span className="text-sm text-muted-foreground">Países Visitados</span>
+                  <span className="text-sm text-muted-foreground">Países Visitados: {stats.visited || 0}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-secondary rounded-full border-2 border-white"></div>
-                  <span className="text-sm text-muted-foreground">Países Desejados</span>
+                  <span className="text-sm text-muted-foreground">Países Desejados: {stats.desired || 0}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-yellow-500 rounded-full border-2 border-white"></div>
-                  <span className="text-sm text-muted-foreground">Outros Países</span>
+                  <span className="text-sm text-muted-foreground">Outros Países: {allCountries.length - (stats.visited || 0) - (stats.desired || 0)}</span>
                 </div>
               </div>
+              <p className="text-center text-xs text-muted-foreground mt-4">
+                Para adicionar um país à sua lista de desejos, clique no país desejado no mapa e selecione "Adicionar à Lista". Você também pode visualizar imagens do local pelo Google Maps clicando no botão correspondente.
+              </p>
             </div>
           </motion.div>
           <motion.div
@@ -321,20 +332,20 @@ const Dashboard = () => {
               </div>
             )}
           </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="p-4 pt-0 mt-8"
-            >
-              <div className="glass rounded-lg p-4 border border-border">
-                <div className="text-center text-sm text-muted-foreground">
-                  <p>Desenvolvido por <strong>Tharlles Jhoines Silva Té</strong></p>
-                  <p>Telefone: <a href="tel:+5577998753554" className="text-primary">77998753554</a></p>
-                  <p>Email: <a href="mailto:tharlles.engineer@gmail.com" className="text-primary">tharlles.engineer@gmail.com</a></p>
-                </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="p-4 pt-0 mt-8"
+          >
+            <div className="glass rounded-lg p-4 border border-border">
+              <div className="text-center text-sm text-muted-foreground">
+                <p>Desenvolvido por <strong>Tharlles Jhoines Silva Té</strong></p>
+                <p>Telefone: <a href="tel:+5577998753554" className="text-primary">77998753554</a></p>
+                <p>Email: <a href="mailto:tharlles.engineer@gmail.com" className="text-primary">tharlles.engineer@gmail.com</a></p>
               </div>
-            </motion.div>
+            </div>
+          </motion.div>
 
         </div>
       </main>
@@ -356,7 +367,10 @@ const Dashboard = () => {
         onAddCountry={handleAddCountry}
         loading={addingCountry}
       />
-
+      <TutorialModal
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+      />
       <VisitedModal
         isOpen={visitedModal.isOpen}
         onClose={() => setVisitedModal({ isOpen: false, country: null })}
